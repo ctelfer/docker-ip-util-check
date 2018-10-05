@@ -72,7 +72,7 @@ done
 echo "Counting container IP allocations per network"
 for node in $NODEIDS ; do
 	for task in $(docker node ps -q $node) ; do
-		nets=$(docker inspect $task | jq -r '.[].Spec.Networks[].Target' | cut -c 1-12)
+		nets=$(docker inspect $task | jq -r '.[].Spec.Networks[].Target' 2>/dev/null | cut -c 1-12)
 		for net in $nets; do
 			NET2NCIP[$net]=$((${NET2NCIP[$net]} + 1))
 		done
@@ -82,7 +82,7 @@ done
 
 echo "Counting service VIP allocations per network"
 for svc in $SVCIDS ; do
-	for viprec in $(docker service inspect $svc | jq -rc '.[].Endpoint.VirtualIPs[]'); do
+	for viprec in $(docker service inspect $svc | jq -rc '.[].Endpoint.VirtualIPs[]' 2>/dev/null); do
 		net=$(echo "$viprec" | jq -r '.NetworkID' | cut -c 1-12)
 		addr=$(echo "$viprec" | jq -r '.Addr')
 		NET2NVIP[$net]=$((${NET2NVIP[$net]} + 1))
