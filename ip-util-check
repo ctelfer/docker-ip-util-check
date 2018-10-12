@@ -17,7 +17,7 @@ declare -A NET2NVIP	# number of virtuail IP addresses for each overlay network
 
 # Report the general IP utilization status of an overlay network
 # Args:
-#  - $1 - network ID to report on 
+#  - $1 - network ID to report on
 report() {
 	echo "----"
 	if [ "${NET2CAP[$1]}" -eq 0 ] ; then
@@ -54,10 +54,12 @@ SVCIDS=$(docker service ls -q)
 echo "Gathering overlay network information"
 for net in $NETS ; do
         NET2NAME[$net]=$(docker network inspect $net | jq -r '.[].Name')
-        NET2SUB[$net]=$(docker network inspect $net | jq -r '.[].IPAM.Config[].Subnet') 
+	set +e
+        NET2SUB[$net]=$(docker network inspect $net | jq -r '.[].IPAM.Config[].Subnet' 2>/dev/null)
 	if [ -z "${NET2SUB[$net]}" ] ; then
-		NET2SUB[$net]=$(docker network inspect ${NET2NAME[$net]} | jq -r '.[].IPAM.Config[].Subnet')
+		NET2SUB[$net]=$(docker network inspect ${NET2NAME[$net]} | jq -r '.[].IPAM.Config[].Subnet' 2>/dev/null)
 	fi
+	set -e
         NET2CAP[$net]=0
         NET2NCIP[$net]=0
         NET2NVIP[$net]=0
